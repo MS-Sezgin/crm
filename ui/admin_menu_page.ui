@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AdminMenuPage</class>
+ <widget class="QWidget" name="pageRoot">
+  <property name="windowTitle"><string>CRM Capstone - Admin Menu</string></property>
+  <layout class="QVBoxLayout" name="rootLayout">
+   <property name="leftMargin"><number>16</number></property>
+   <property name="topMargin"><number>24</number></property>
+   <property name="rightMargin"><number>16</number></property>
+   <property name="bottomMargin"><number>24</number></property>
+   <property name="spacing"><number>16</number></property>
+   <item>
+    <widget class="QFrame" name="headerBar">
+     <layout class="QVBoxLayout" name="headerLayout">
+      <property name="leftMargin"><number>24</number></property>
+      <property name="topMargin"><number>18</number></property>
+      <property name="rightMargin"><number>24</number></property>
+      <property name="bottomMargin"><number>18</number></property>
+      <property name="spacing"><number>2</number></property>
+      <item><widget class="QLabel" name="headerTitle"><property name="text"><string>Admin Menu</string></property></widget></item>
+      <item><widget class="QLabel" name="headerSub"><property name="text"><string>Calendar records and participant mail</string></property></widget></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="card">
+     <layout class="QVBoxLayout" name="cardLayout">
+      <property name="leftMargin"><number>20</number></property>
+      <property name="topMargin"><number>20</number></property>
+      <property name="rightMargin"><number>20</number></property>
+      <property name="bottomMargin"><number>20</number></property>
+      <property name="spacing"><number>14</number></property>
+      <item>
+       <layout class="QHBoxLayout" name="buttonRow">
+        <item><widget class="QPushButton" name="btnEventRecord"><property name="text"><string>Event Record</string></property></widget></item>
+        <item><widget class="QPushButton" name="btnMail"><property name="text"><string>Mail</string></property></widget></item>
+        <item><spacer name="buttonSpacer"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="tableCalendar">
+        <property name="styleSheet"><string>QHeaderView::section { background-color: #D5DCE8; color: #0F172A; font-weight: 600; font-size: 12px; padding: 10px 12px; border: none; border-right: 1px solid #94A3B8; border-bottom: 2px solid #0B2545; }</string></property>
+        <property name="alternatingRowColors"><bool>true</bool></property>
+        <attribute name="horizontalHeaderStretchLastSection"><bool>false</bool></attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize"><number>150</number></attribute>
+        <attribute name="horizontalHeaderMinimumSectionSize"><number>120</number></attribute>
+        <attribute name="horizontalHeaderHighlightSections"><bool>false</bool></attribute>
+        <attribute name="verticalHeaderVisible"><bool>false</bool></attribute>
+        <column><property name="text"><string>Activity Name</string></property></column>
+        <column><property name="text"><string>Start Time</string></property></column>
+        <column><property name="text"><string>Participant Mail</string></property></column>
+        <column><property name="text"><string>Organizer Mail</string></property></column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="footerRow">
+     <item><spacer name="footerSpacer"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+     <item><widget class="QPushButton" name="btnReturnAdmin"><property name="text"><string>Return to Admin Screen</string></property></widget></item>
+     <item><widget class="QPushButton" name="btnExit"><property name="text"><string>Exit</string></property></widget></item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

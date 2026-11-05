@@ -1,0 +1,91 @@
+digraph Classes {
+  graph [rankdir=TB, splines=spline, nodesep=0.35, ranksep=0.7, fontname="Helvetica", bgcolor="white", pad=0.3,
+         label=<<B>CRM Capstone - Class Diagram (PostgreSQL version)</B>>, labelloc=t, fontsize=18];
+  node  [shape=plain, fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#334155"];
+
+  MainWindow [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#1D4ED8">
+    <TR><TD BGCOLOR="#DBE7FF"><B>MainWindow</B></TD></TR>
+    <TR><TD ALIGN="LEFT">- store : DataStore<BR ALIGN="LEFT"/>- pages : dict<BR ALIGN="LEFT"/>- is_admin : bool<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ show_page(name)<BR ALIGN="LEFT"/>+ handle_navigation(target)<BR ALIGN="LEFT"/>+ closeEvent(event)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  BasePage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#1D4ED8">
+    <TR><TD BGCOLOR="#DBE7FF"><I>BasePage</I> «abstract, QWidget»</TD></TR>
+    <TR><TD ALIGN="LEFT">+ store : DataStore<BR ALIGN="LEFT"/># UI_FILE, THEME, LOGO_WIDTH<BR ALIGN="LEFT"/>+ navigate, message : pyqtSignal<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ build_ui()   + connect_signals()<BR ALIGN="LEFT"/>+ route(button, target)<BR ALIGN="LEFT"/>+ show_message(text)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  LoginPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>LoginPage</B></TD></TR><TR><TD ALIGN="LEFT">+ on_login()<BR ALIGN="LEFT"/>+ reset()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  ApplicationsPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>ApplicationsPage</B></TD></TR><TR><TD ALIGN="LEFT">- current_view : str<BR ALIGN="LEFT"/>+ load_view()   + refresh()<BR ALIGN="LEFT"/>+ update_counts()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  MentorInterviewPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>MentorInterviewPage</B></TD></TR><TR><TD ALIGN="LEFT">- current_category : str<BR ALIGN="LEFT"/>+ load_tabs()   + refresh()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  InterviewsPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>InterviewsPage</B></TD></TR><TR><TD ALIGN="LEFT">- current_view : str<BR ALIGN="LEFT"/>+ set_view(view)   + refresh()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  PreferencesPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>PreferencesPage</B></TD></TR></TABLE>>];
+  PreferencesAdminPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>PreferencesAdminPage</B></TD></TR></TABLE>>];
+  AdminMenuPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>AdminMenuPage</B></TD></TR><TR><TD ALIGN="LEFT">+ on_event_record()<BR ALIGN="LEFT"/>+ on_mail()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  DataStore [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
+    <TR><TD BGCOLOR="#CCFBF1"><B>DataStore</B></TD></TR>
+    <TR><TD ALIGN="LEFT">- db : Database<BR ALIGN="LEFT"/>- repos : CrmRepositories<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ check_login(user, password) : str<BR ALIGN="LEFT"/>+ applications(view, search)<BR ALIGN="LEFT"/>+ application_counts()<BR ALIGN="LEFT"/>+ people(view, search)<BR ALIGN="LEFT"/>+ interviews(kind, search)<BR ALIGN="LEFT"/>+ mentor(category, search)<BR ALIGN="LEFT"/>+ mentor_categories()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  Database [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
+    <TR><TD BGCOLOR="#CCFBF1"><B>Database</B></TD></TR>
+    <TR><TD ALIGN="LEFT">- config : DbConfig<BR ALIGN="LEFT"/>- _connection<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ connect()   + close()<BR ALIGN="LEFT"/>+ transaction()<BR ALIGN="LEFT"/>+ execute(sql, params)<BR ALIGN="LEFT"/>+ fetch_all / fetch_one / fetch_value<BR ALIGN="LEFT"/>+ execute_script(path)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  DbConfig [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
+    <TR><TD BGCOLOR="#CCFBF1"><B>DbConfig</B></TD></TR>
+    <TR><TD ALIGN="LEFT">+ host, port, dbname<BR ALIGN="LEFT"/>+ user, password, schema<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ load() : DbConfig<BR ALIGN="LEFT"/>+ connect_kwargs() : dict<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  CrmRepositories [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#B45309">
+    <TR><TD BGCOLOR="#FEF3C7"><B>CrmRepositories</B></TD></TR>
+    <TR><TD ALIGN="LEFT">+ kursiyerler, basvurular, mentor,<BR ALIGN="LEFT"/>   mulakatlar, kullanicilar<BR ALIGN="LEFT"/>+ counts() : dict<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  BaseRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#B45309">
+    <TR><TD BGCOLOR="#FEF3C7"><I>BaseRepository</I></TD></TR>
+    <TR><TD ALIGN="LEFT"># TABLE : str<BR ALIGN="LEFT"/>+ count() : int<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  KursiyerRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>KursiyerRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ find(name, mail)<BR ALIGN="LEFT"/>+ add(...)   + fill_missing(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  BasvuruRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>BasvuruRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(kursiyer_id, values)<BR ALIGN="LEFT"/>+ count_by_period()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  MentorRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>MentorRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  MulakatRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>MulakatRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  KullaniciRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>KullaniciRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(user, password, role)<BR ALIGN="LEFT"/>+ authenticate(user, password)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  PasswordHasher [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#7C3AED">
+    <TR><TD BGCOLOR="#EDE9FE"><B>PasswordHasher</B></TD></TR>
+    <TR><TD ALIGN="LEFT">+ hash(password) : str<BR ALIGN="LEFT"/>+ verify(password, stored) : bool<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  GoogleServices [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#475569">
+    <TR><TD BGCOLOR="#E2E8F0"><B>GoogleServices</B> «module»</TD></TR>
+    <TR><TD ALIGN="LEFT">+ fetch_events() : list<BR ALIGN="LEFT"/>+ send_email(recipients, subject, body)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  ExcelMigrator [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#7C3AED">
+    <TR><TD BGCOLOR="#EDE9FE"><B>ExcelMigrator</B> «one-time tool»</TD></TR>
+    <TR><TD ALIGN="LEFT">+ run(truncate, dry_run, create_schema)<BR ALIGN="LEFT"/>- _person(...)   - _verify(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  ExcelSheet [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#7C3AED"><TR><TD><B>ExcelSheet</B></TD></TR><TR><TD ALIGN="LEFT">+ load(folder, file)<BR ALIGN="LEFT"/>+ records(spec, required)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  // inheritance (empty triangle)
+  edge [arrowhead=empty, style=solid];
+  LoginPage -> BasePage; ApplicationsPage -> BasePage; MentorInterviewPage -> BasePage; InterviewsPage -> BasePage;
+  PreferencesPage -> BasePage; PreferencesAdminPage -> BasePage; AdminMenuPage -> BasePage;
+  KursiyerRepository -> BaseRepository; BasvuruRepository -> BaseRepository; MentorRepository -> BaseRepository;
+  MulakatRepository -> BaseRepository; KullaniciRepository -> BaseRepository;
+
+  // composition / aggregation
+  edge [arrowhead=diamond, style=solid, dir=back, arrowtail=none];
+  edge [arrowhead=none, arrowtail=diamond, dir=back];
+  MainWindow -> BasePage [label="1 : 7 pages", dir=back, arrowhead=none, arrowtail=diamond];
+  CrmRepositories -> KursiyerRepository; CrmRepositories -> BasvuruRepository; CrmRepositories -> MentorRepository;
+  CrmRepositories -> MulakatRepository; CrmRepositories -> KullaniciRepository;
+
+  // dependencies (dashed)
+  edge [arrowhead=vee, style=dashed, dir=forward, arrowtail=none];
+  MainWindow -> DataStore [label="creates / owns"];
+  BasePage -> DataStore [label="queries"];
+  DataStore -> CrmRepositories; DataStore -> Database;
+  CrmRepositories -> Database [label="shared connection"];
+  Database -> DbConfig;
+  KullaniciRepository -> PasswordHasher;
+  AdminMenuPage -> GoogleServices [label="calendar, mail"];
+  ExcelMigrator -> CrmRepositories; ExcelMigrator -> ExcelSheet;
+}

@@ -1,0 +1,39 @@
+digraph UseCases {
+  graph [rankdir=LR, splines=spline, nodesep=0.28, ranksep=1.6, fontname="Helvetica", bgcolor="white", pad=0.3,
+         label=<<B>CRM Capstone - Use Case Diagram</B>>, labelloc=t, fontsize=18, compound=true];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#334155", arrowhead=vee];
+
+  node [shape=box, style="rounded,filled", fillcolor="#DBE7FF", color="#1D4ED8", width=1.4, height=0.6];
+  User  [label="Regular User"];
+  Admin [label="Admin"];
+  node [fillcolor="#E2E8F0", color="#475569"];
+  GCal  [label="Google Calendar"];
+  Gmail [label="Gmail"];
+  node [fillcolor="#CCFBF1", color="#0F766E"];
+  PG    [label="PostgreSQL\ndatabase"];
+
+  subgraph cluster_app {
+    label="CRM Application"; style="rounded"; color="#94A3B8"; fontsize=12;
+    node [shape=ellipse, style=filled, fillcolor="#F8FAFC", color="#64748B", width=0, height=0];
+    u1 [label="Log in\n(user name + password)"];
+    u2 [label="Open Preferences"];
+    u3 [label="View applications"];
+    u4 [label="Search by name"];
+    u5 [label="Filter applications\n(mentor meeting, duplicates, unique,\nprevious VIT, different record)"];
+    u6 [label="View interviews\n(project sent / received)"];
+    u7 [label="View mentor conversations"];
+    u8 [label="Filter conversations by tab"];
+    u9 [label="Reload data from database"];
+    u10 [label="Return / log out / exit"];
+    a1 [label="Open Admin Menu"];
+    a2 [label="View calendar events"];
+    a3 [label="Send reminder mail\nto participants"];
+  }
+  User -> {u1 u2 u3 u4 u5 u6 u7 u8 u9 u10};
+  Admin -> User [arrowhead=empty, label="is a"];
+  Admin -> {a1 a2 a3};
+  u1 -> PG [style=dashed, label="check hash"];
+  u3 -> PG [style=dashed]; u6 -> PG [style=dashed]; u7 -> PG [style=dashed];
+  a2 -> GCal [style=dashed]; a3 -> Gmail [style=dashed];
+}

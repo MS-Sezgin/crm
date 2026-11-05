@@ -1,0 +1,28 @@
+# Google keys, tokens and saved ids: never upload
+credentials/
+
+# Student data (Excel files, VIT lists): never upload
+data/
+data_backup/
+migration_report.txt
+
+# Database password: never upload
+.env
+
+# Build output from PyInstaller
+dist/
+build/
+*.spec
+
+# Python cache and temporary files
+__pycache__/
+*.pyc
+*.part
+*.log
+
+# Editor and virtual environment folders
+.vscode/
+.idea/
+venv/
+.venv/
+env/

@@ -1,0 +1,83 @@
+digraph ERD {
+  graph [rankdir=LR, splines=spline, nodesep=0.9, ranksep=2.2, fontname="Helvetica", bgcolor="white", pad=0.4,
+         label=<<B>CRM Projesi - ERD (PostgreSQL)</B><BR/><FONT POINT-SIZE="11">PK = birincil anahtar   FK = yabancı anahtar   1 : N = bire çok ilişki</FONT>>, labelloc=t, fontsize=18];
+  node  [shape=plain, fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=10, color="#334155", arrowhead=crow, arrowtail=tee, dir=both, penwidth=1.4];
+
+  Kursiyerler [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#1D4ED8">
+      <TR><TD BGCOLOR="#1D4ED8" COLSPAN="2"><FONT COLOR="white"><B>Kursiyerler</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>KursiyerID</B></TD><TD PORT="id">PK, SERIAL</TD></TR>
+      <TR><TD ALIGN="LEFT">AdSoyad</TD><TD>VARCHAR(150)</TD></TR>
+      <TR><TD ALIGN="LEFT">MailAdresi</TD><TD>VARCHAR(150)</TD></TR>
+      <TR><TD ALIGN="LEFT">TelefonNumarasi</TD><TD>VARCHAR(30)</TD></TR>
+      <TR><TD ALIGN="LEFT">PostaKodu</TD><TD>VARCHAR(10)</TD></TR>
+      <TR><TD ALIGN="LEFT">YasadiginizEyalet</TD><TD>VARCHAR(50)</TD></TR>
+      <TR><TD COLSPAN="2" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="9">UNIQUE (AdSoyad, MailAdresi)</FONT></TD></TR>
+    </TABLE>>];
+
+  Basvurular [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
+      <TR><TD BGCOLOR="#0F766E" COLSPAN="2"><FONT COLOR="white"><B>Basvurular</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>BasvuruID</B></TD><TD>PK, SERIAL</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="fk"><I>KursiyerID</I></TD><TD>FK, NOT NULL</TD></TR>
+      <TR><TD ALIGN="LEFT">ZamanDamgasi</TD><TD>TIMESTAMP</TD></TR>
+      <TR><TD ALIGN="LEFT">SuAnkiDurum</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">KatilmakIstenenEgitim</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">EkonomikDurum</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">DilKursunaDevamEdiyorMu</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">IngilizceSeviye</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">HollandacaSeviye</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">BelediyeBaskisi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">BaskaITKursuBitirdiMi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">OnlineITKursuTakipEttiMi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">ITIsTecrubesi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">BaskaProjedeMi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">ITBolumleri</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">VITNedenleri</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">Motivasyon</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">MentorGorusmesi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">BasvuruDonemi</TD><TD>VARCHAR(20), NOT NULL</TD></TR>
+      <TR><TD ALIGN="LEFT">YesilTikOlan</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">DahiliTakip1..3</TD><TD>NUMERIC</TD></TR>
+      <TR><TD ALIGN="LEFT">IslemDurumu</TD><TD>VARCHAR(50)</TD></TR>
+    </TABLE>>];
+
+  Mentortablosu [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#B45309">
+      <TR><TD BGCOLOR="#B45309" COLSPAN="2"><FONT COLOR="white"><B>Mentortablosu</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>MentorID</B></TD><TD>PK, SERIAL</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="fk"><I>KursiyerID</I></TD><TD>FK, NOT NULL</TD></TR>
+      <TR><TD ALIGN="LEFT">GorusmeTarihi</TD><TD>DATE</TD></TR>
+      <TR><TD ALIGN="LEFT">MentorAdSoyad</TD><TD>VARCHAR(100)</TD></TR>
+      <TR><TD ALIGN="LEFT">BilgiSahibiMi</TD><TD>SMALLINT</TD></TR>
+      <TR><TD ALIGN="LEFT">VITProjesineKatilabilirMi</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">Dusunce</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">YogunlukDurumu</TD><TD>SMALLINT</TD></TR>
+      <TR><TD ALIGN="LEFT">Yorumlar</TD><TD>TEXT</TD></TR>
+      <TR><TD ALIGN="LEFT">VITGrubu</TD><TD>VARCHAR(20)</TD></TR>
+    </TABLE>>];
+
+  Mulakatlar [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#7C3AED">
+      <TR><TD BGCOLOR="#7C3AED" COLSPAN="2"><FONT COLOR="white"><B>Mulakatlar</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>MulakatID</B></TD><TD>PK, SERIAL</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="fk"><I>KursiyerID</I></TD><TD>FK, NOT NULL</TD></TR>
+      <TR><TD ALIGN="LEFT">ProjeGonderilisTarihi</TD><TD>DATE</TD></TR>
+      <TR><TD ALIGN="LEFT">ProjeninGelisTarihi</TD><TD>DATE</TD></TR>
+    </TABLE>>];
+
+  Kullanicilar [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#475569">
+      <TR><TD BGCOLOR="#475569" COLSPAN="2"><FONT COLOR="white"><B>Kullanicilar</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Kullanici</B></TD><TD>PK, VARCHAR(50)</TD></TR>
+      <TR><TD ALIGN="LEFT">Parola</TD><TD>VARCHAR(255), hash</TD></TR>
+      <TR><TD ALIGN="LEFT">Yetki</TD><TD>'admin' | 'user'</TD></TR>
+      <TR><TD COLSPAN="2" BGCOLOR="#F1F5F9"><FONT POINT-SIZE="9">Diğer tablolarla ilişkisi yok (giriş kontrolü)</FONT></TD></TR>
+    </TABLE>>];
+
+  Kursiyerler:id:e -> Basvurular:fk:w [label="  1 : N  "];
+  Kursiyerler:id:e -> Mentortablosu:fk:w [label="  1 : N  "];
+  Kursiyerler:id:e -> Mulakatlar:fk:w [label="  1 : N  "];
+  Kullanicilar -> Kursiyerler [style=invis];
+}
