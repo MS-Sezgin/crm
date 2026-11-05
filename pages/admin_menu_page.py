@@ -1,26 +1,9 @@
-from PyQt6.QtWidgets import (QHeaderView, QAbstractItemView, QHBoxLayout, QMessageBox, QPushButton,
-                             QTableWidget, QVBoxLayout)
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMessageBox, QPushButton, QTableWidget, QVBoxLayout
 
 import google_services
 from data_store import CALENDAR_COLUMNS
-from pages.base_page import BasePage, fill_table
+from pages.base_page import BasePage, fill_table, fit_columns
 from styles import THEMES
-
-
-HEADER_QSS = "QHeaderView::section { background-color: #D5DCE8; color: #0F172A; font-weight: 600; font-size: 12px; padding: 10px 12px; border: none; border-right: 1px solid #94A3B8; border-bottom: 2px solid #0B2545; }"
-
-
-def style_table(table):
-    """Make header labels readable: fixed default width, wrapped text, no clipping."""
-    header = table.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-    header.setDefaultSectionSize(150)
-    header.setMinimumSectionSize(120)
-    header.setStretchLastSection(False)
-    header.setHighlightSections(False)
-    header.setMinimumHeight(44)
-    table.setStyleSheet(HEADER_QSS)
-
 
 
 class AdminMenuPage(BasePage):
@@ -60,14 +43,20 @@ class AdminMenuPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableCalendar)
-        style_table(self.tableCalendar)
         self.route(self.btnReturnAdmin, "preferences_admin")
         self.route(self.btnExit, "exit")
         self.events = []
-        self.tableCalendar.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.tableCalendar.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.btnEventRecord.clicked.connect(self.on_event_record)
         self.btnMail.clicked.connect(self.on_mail)
+
+    def decorate(self):
+        super().decorate()
+        # a line under the table: explains the empty screen first, then reports what was loaded
+        self.labelHint = QLabel("Click \"Event Record\" to load the events of your Google Calendar.")
+        self.labelHint.setObjectName("labelMuted")
+        self.labelHint.setWordWrap(True)
+        fit_columns(self.tableCalendar)
+        self.findChild(QFrame, "card").layout().addWidget(self.labelHint)
 
     def confirm(self, text):
         answer = QMessageBox.question(self, "Send mail", text)
@@ -78,13 +67,17 @@ class AdminMenuPage(BasePage):
             self.events = google_services.fetch_events()
         except google_services.GoogleSetupError as error:
             self.show_message(str(error))
+            self.labelHint.setText(str(error))
             return
         except Exception as error:  # network or API errors
             self.show_message(f"Google Calendar error: {error}")
+            self.labelHint.setText(f"Google Calendar error: {error}")
             return
         rows = [[e["name"], e["start"], ", ".join(e["participants"]), e["organizer"]] for e in self.events]
         fill_table(self.tableCalendar, CALENDAR_COLUMNS, rows)
         self.show_message(f"{len(rows)} event(s) loaded from Google Calendar")
+        self.labelHint.setText(f"{len(rows)} event(s) loaded from Google Calendar. "
+                               "Select one and press Mail to send a reminder.")
 
     def on_mail(self, *_):
         row = self.tableCalendar.currentRow()

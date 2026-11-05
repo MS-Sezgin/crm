@@ -6,13 +6,13 @@ digraph Classes {
 
   MainWindow [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#1D4ED8">
     <TR><TD BGCOLOR="#DBE7FF"><B>MainWindow</B></TD></TR>
-    <TR><TD ALIGN="LEFT">- store : DataStore<BR ALIGN="LEFT"/>- pages : dict<BR ALIGN="LEFT"/>- is_admin : bool<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">- store : DataStore<BR ALIGN="LEFT"/>- pages : dict<BR ALIGN="LEFT"/>- sidebar : Sidebar<BR ALIGN="LEFT"/>- is_admin : bool<BR ALIGN="LEFT"/></TD></TR>
     <TR><TD ALIGN="LEFT">+ show_page(name)<BR ALIGN="LEFT"/>+ handle_navigation(target)<BR ALIGN="LEFT"/>+ closeEvent(event)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
 
   BasePage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#1D4ED8">
     <TR><TD BGCOLOR="#DBE7FF"><I>BasePage</I> «abstract, QWidget»</TD></TR>
     <TR><TD ALIGN="LEFT">+ store : DataStore<BR ALIGN="LEFT"/># UI_FILE, THEME, LOGO_WIDTH<BR ALIGN="LEFT"/>+ navigate, message : pyqtSignal<BR ALIGN="LEFT"/></TD></TR>
-    <TR><TD ALIGN="LEFT">+ build_ui()   + connect_signals()<BR ALIGN="LEFT"/>+ route(button, target)<BR ALIGN="LEFT"/>+ show_message(text)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+    <TR><TD ALIGN="LEFT">+ build_ui()   + connect_signals()<BR ALIGN="LEFT"/>+ decorate()   + on_show()<BR ALIGN="LEFT"/>+ route(button, target)<BR ALIGN="LEFT"/>+ show_message(text)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
 
   LoginPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>LoginPage</B></TD></TR><TR><TD ALIGN="LEFT">+ on_login()<BR ALIGN="LEFT"/>+ reset()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
   ApplicationsPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>ApplicationsPage</B></TD></TR><TR><TD ALIGN="LEFT">- current_view : str<BR ALIGN="LEFT"/>+ load_view()   + refresh()<BR ALIGN="LEFT"/>+ update_counts()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
@@ -22,10 +22,13 @@ digraph Classes {
   PreferencesAdminPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>PreferencesAdminPage</B></TD></TR></TABLE>>];
   AdminMenuPage [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>AdminMenuPage</B></TD></TR><TR><TD ALIGN="LEFT">+ on_event_record()<BR ALIGN="LEFT"/>+ on_mail()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
 
+  Sidebar [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#0B1F3A"><TR><TD BGCOLOR="#D5DCE8"><B>Sidebar</B> «QFrame»</TD></TR><TR><TD ALIGN="LEFT">+ navigate : pyqtSignal<BR ALIGN="LEFT"/>+ set_user(name, is_admin)<BR ALIGN="LEFT"/>+ set_active(page)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  HomeBase [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>HomeBase</B></TD></TR><TR><TD ALIGN="LEFT">+ TILES : list<BR ALIGN="LEFT"/>+ set_user(name)<BR ALIGN="LEFT"/>+ on_show()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
   DataStore [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
     <TR><TD BGCOLOR="#CCFBF1"><B>DataStore</B></TD></TR>
     <TR><TD ALIGN="LEFT">- db : Database<BR ALIGN="LEFT"/>- repos : CrmRepositories<BR ALIGN="LEFT"/></TD></TR>
-    <TR><TD ALIGN="LEFT">+ check_login(user, password) : str<BR ALIGN="LEFT"/>+ applications(view, search)<BR ALIGN="LEFT"/>+ application_counts()<BR ALIGN="LEFT"/>+ people(view, search)<BR ALIGN="LEFT"/>+ interviews(kind, search)<BR ALIGN="LEFT"/>+ mentor(category, search)<BR ALIGN="LEFT"/>+ mentor_categories()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+    <TR><TD ALIGN="LEFT">+ check_login(user, password) : str<BR ALIGN="LEFT"/>+ summary() : dict<BR ALIGN="LEFT"/>+ applications(view, search)<BR ALIGN="LEFT"/>+ application_counts()<BR ALIGN="LEFT"/>+ people(view, search)<BR ALIGN="LEFT"/>+ interviews(kind, search)<BR ALIGN="LEFT"/>+ mentor(category, search)<BR ALIGN="LEFT"/>+ mentor_categories()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
 
   Database [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
     <TR><TD BGCOLOR="#CCFBF1"><B>Database</B></TD></TR>
@@ -67,7 +70,7 @@ digraph Classes {
   // inheritance (empty triangle)
   edge [arrowhead=empty, style=solid];
   LoginPage -> BasePage; ApplicationsPage -> BasePage; MentorInterviewPage -> BasePage; InterviewsPage -> BasePage;
-  PreferencesPage -> BasePage; PreferencesAdminPage -> BasePage; AdminMenuPage -> BasePage;
+  HomeBase -> BasePage; PreferencesPage -> HomeBase; PreferencesAdminPage -> HomeBase; AdminMenuPage -> BasePage;
   KursiyerRepository -> BaseRepository; BasvuruRepository -> BaseRepository; MentorRepository -> BaseRepository;
   MulakatRepository -> BaseRepository; KullaniciRepository -> BaseRepository;
 
@@ -81,6 +84,7 @@ digraph Classes {
   // dependencies (dashed)
   edge [arrowhead=vee, style=dashed, dir=forward, arrowtail=none];
   MainWindow -> DataStore [label="creates / owns"];
+  MainWindow -> Sidebar [label="1 : 1", dir=back, arrowhead=none, arrowtail=diamond];
   BasePage -> DataStore [label="queries"];
   DataStore -> CrmRepositories; DataStore -> Database;
   CrmRepositories -> Database [label="shared connection"];

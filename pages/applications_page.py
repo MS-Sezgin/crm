@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (QHeaderView, QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+from PyQt6.QtWidgets import (QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                              QTableWidget, QVBoxLayout)
 
 from database import DatabaseError
@@ -12,22 +12,6 @@ EXTRA_FILTERS = [
     ("Different Record", "different"),
     ("Application Filter", "unique"),
 ]
-
-
-HEADER_QSS = "QHeaderView::section { background-color: #DBE7FF; color: #0F172A; font-weight: 600; font-size: 12px; padding: 10px 12px; border: none; border-right: 1px solid #94A3B8; border-bottom: 2px solid #1D4ED8; }"
-
-
-def style_table(table):
-    """Make header labels readable: fixed default width, wrapped text, no clipping."""
-    header = table.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-    header.setDefaultSectionSize(150)
-    header.setMinimumSectionSize(120)
-    header.setStretchLastSection(False)
-    header.setHighlightSections(False)
-    header.setMinimumHeight(44)
-    table.setStyleSheet(HEADER_QSS)
-
 
 
 class ApplicationsPage(BasePage):
@@ -86,7 +70,6 @@ class ApplicationsPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableApplications)
-        style_table(self.tableApplications)
         self.route(self.btnReturn, "return_preferences")
         self.btnRefresh.clicked.connect(self.on_refresh)
         self.route(self.btnExit, "exit")
@@ -98,6 +81,16 @@ class ApplicationsPage(BasePage):
         self.btnMeetingNotDefined.clicked.connect(lambda: self.set_view("not_defined"))
         self.comboFilters.currentIndexChanged.connect(self.on_extra_filter)
         self.update_counts()
+
+    def mark_view(self):
+        """Fill the button of the current view; extra filters from the combo box have no button."""
+        buttons = {"all": self.btnAllApplications, "defined": self.btnMeetingDefined,
+                   "not_defined": self.btnMeetingNotDefined}
+        self.mark_segment(buttons.get(self.current_view))
+
+    def on_show(self):
+        self.update_counts()
+        self.refresh()
 
     def on_extra_filter(self, index):
         view = EXTRA_FILTERS[index][1]
@@ -141,6 +134,7 @@ class ApplicationsPage(BasePage):
             return
         fill_table(self.tableApplications, headers, rows)
         message = f"{len(rows)} record(s) shown"
+        self.mark_view()
         self.labelMuted.setText(message)
         self.show_message(message)
         return message

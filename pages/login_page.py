@@ -1,5 +1,7 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QCheckBox, QLabel, QLineEdit, QPushButton, QVBoxLayout
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import (QCheckBox, QFrame, QGraphicsDropShadowEffect, QLabel, QLineEdit, QPushButton,
+                             QVBoxLayout)
 
 from database import DatabaseError
 from pages.base_page import BasePage
@@ -52,8 +54,19 @@ class LoginPage(BasePage):
         root.addWidget(card, 0, Qt.AlignmentFlag.AlignHCenter)
 
         self.btnClose = QPushButton("Close")
+        self.btnClose.setObjectName("btnClose")
         root.addWidget(self.btnClose, 0, Qt.AlignmentFlag.AlignHCenter)
         root.addStretch()
+
+    def decorate(self):
+        super().decorate()
+        card = self.findChild(QFrame, "card")
+        shadow = QGraphicsDropShadowEffect(card)
+        shadow.setBlurRadius(48)
+        shadow.setOffset(0, 14)
+        shadow.setColor(QColor(0, 0, 0, 110))
+        card.setGraphicsEffect(shadow)
+        self.username = ""
 
     def connect_signals(self):
         self.btnLogin.clicked.connect(self.on_login)
@@ -86,5 +99,6 @@ class LoginPage(BasePage):
             self.labelWarning.setText("Incorrect username or password.")
             return
         self.labelWarning.setText("")
+        self.username = username
         self.show_message(f"Logged in as {username} ({role})")
         self.navigate.emit("preferences_admin" if role == "admin" else "preferences")

@@ -1,24 +1,8 @@
-from PyQt6.QtWidgets import QHeaderView, QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QVBoxLayout
+from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QVBoxLayout
 
 from database import DatabaseError
 from pages.base_page import BasePage, fill_table
 from styles import THEMES
-
-
-HEADER_QSS = "QHeaderView::section { background-color: #D7F0FB; color: #0F172A; font-weight: 600; font-size: 12px; padding: 10px 12px; border: none; border-right: 1px solid #94A3B8; border-bottom: 2px solid #0EA5E9; }"
-
-
-def style_table(table):
-    """Make header labels readable: fixed default width, wrapped text, no clipping."""
-    header = table.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-    header.setDefaultSectionSize(150)
-    header.setMinimumSectionSize(120)
-    header.setStretchLastSection(False)
-    header.setHighlightSections(False)
-    header.setMinimumHeight(44)
-    table.setStyleSheet(HEADER_QSS)
-
 
 
 class MentorInterviewPage(BasePage):
@@ -71,7 +55,6 @@ class MentorInterviewPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableConversations)
-        style_table(self.tableConversations)
         self.route(self.btnReturn, "return_preferences")
         self.btnRefresh.clicked.connect(self.on_refresh)
         self.route(self.btnExit, "exit")
@@ -81,6 +64,11 @@ class MentorInterviewPage(BasePage):
         self.inputSearch.returnPressed.connect(self.refresh)
         self.btnAllConversations.clicked.connect(self.show_all)
         self.comboTabs.currentIndexChanged.connect(self.on_tab_changed)
+
+    def on_show(self):
+        self.load_tabs()  # the categories may have changed since the last visit
+        self.current_category = None
+        self.refresh()
 
     def load_tabs(self):
         try:
@@ -120,6 +108,7 @@ class MentorInterviewPage(BasePage):
             return
         fill_table(self.tableConversations, headers, rows)
         message = f"{len(rows)} conversation(s) shown"
+        self.mark_segment(self.btnAllConversations if self.current_category is None else None)
         self.labelMuted.setText(message)
         self.show_message(message)
         return message

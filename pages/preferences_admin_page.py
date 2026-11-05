@@ -1,13 +1,18 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLabel, QPushButton, QVBoxLayout
 
-from pages.base_page import BasePage
+from pages.home_base import HomeBase
 from styles import THEMES
 
 
-class PreferencesAdminPage(BasePage):
+class PreferencesAdminPage(HomeBase):
     UI_FILE = "preferences_admin_page.ui"
-    LOGO_WIDTH = 240
+    TILES = [
+        ("btnApplications", "applications", "Applications", "Search and review submitted applications"),
+        ("btnMentorInterview", "mentor", "Mentor Interview", "Mentor conversations and recommendations"),
+        ("btnInterviews", "interviews", "Interviews", "Project exchange between students and mentors"),
+        ("btnAdmin", "admin", "Admin Menu", "Calendar events and reminder mail"),
+    ]
     THEME = THEMES["preferences_admin"]
 
     def build_ui(self):
@@ -21,11 +26,11 @@ class PreferencesAdminPage(BasePage):
         root.addWidget(self.labelLogo, 0, Qt.AlignmentFlag.AlignHCenter)
 
         header = self.make_header("Preferences", "Administrator view")
-        header.setFixedWidth(460)
+        header.setFixedWidth(620)
         root.addWidget(header, 0, Qt.AlignmentFlag.AlignHCenter)
 
         card = self.make_card()
-        card.setFixedWidth(460)
+        card.setFixedWidth(620)
         body = QVBoxLayout(card)
         body.setContentsMargins(24, 24, 24, 24)
         body.setSpacing(12)
@@ -41,7 +46,7 @@ class PreferencesAdminPage(BasePage):
         self.btnAdmin = QPushButton("Admin Menu")
         for button in (self.btnApplications, self.btnMentorInterview,
                        self.btnInterviews, self.btnAdmin):
-            button.setMinimumHeight(52)
+            button.setMinimumHeight(72)
             body.addWidget(button)
         root.addWidget(card, 0, Qt.AlignmentFlag.AlignHCenter)
 

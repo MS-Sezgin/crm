@@ -1,24 +1,8 @@
-from PyQt6.QtWidgets import QHeaderView, QHBoxLayout, QLineEdit, QPushButton, QTableWidget, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton, QTableWidget, QVBoxLayout, QLabel
 
 from database import DatabaseError
 from pages.base_page import BasePage, fill_table
 from styles import THEMES
-
-
-HEADER_QSS = "QHeaderView::section { background-color: #DBEAFE; color: #0F172A; font-weight: 600; font-size: 12px; padding: 10px 12px; border: none; border-right: 1px solid #94A3B8; border-bottom: 2px solid #3B82F6; }"
-
-
-def style_table(table):
-    """Make header labels readable: fixed default width, wrapped text, no clipping."""
-    header = table.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-    header.setDefaultSectionSize(150)
-    header.setMinimumSectionSize(120)
-    header.setStretchLastSection(False)
-    header.setHighlightSections(False)
-    header.setMinimumHeight(44)
-    table.setStyleSheet(HEADER_QSS)
-
 
 
 class InterviewsPage(BasePage):
@@ -68,7 +52,6 @@ class InterviewsPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableInterviews)
-        style_table(self.tableInterviews)
         self.route(self.btnReturn, "return_preferences")
         self.btnRefresh.clicked.connect(self.on_refresh)
         self.route(self.btnExit, "exit")
@@ -77,6 +60,9 @@ class InterviewsPage(BasePage):
         self.inputSearch.returnPressed.connect(self.refresh)
         self.btnProjectSent.clicked.connect(lambda: self.set_view("sent"))
         self.btnProjectReceived.clicked.connect(lambda: self.set_view("received"))
+
+    def on_show(self):
+        self.refresh()
 
     def set_view(self, view):
         self.current_view = view
@@ -95,6 +81,7 @@ class InterviewsPage(BasePage):
             return
         fill_table(self.tableInterviews, headers, rows)
         message = f"{len(rows)} interview record(s) shown"
+        self.mark_segment({"sent": self.btnProjectSent, "received": self.btnProjectReceived}.get(self.current_view))
         self.labelMuted.setText(message)
         self.show_message(message)
         return message

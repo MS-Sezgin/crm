@@ -113,6 +113,8 @@ def run_flow(use_ui_file, store):
     def current():
         return win.stack.currentWidget()
 
+    check(win.sidebar.isHidden(), "the side menu must be hidden on the login page")
+    check(not login.btnClose.isHidden(), "the login page keeps its own Close button")
     login.inputUsername.setText("student")
     login.inputPassword.setText("wrong")
     login.btnLogin.click()
@@ -127,6 +129,14 @@ def run_flow(use_ui_file, store):
     login.inputPassword.setText("1234")
     login.btnLogin.click()
     check(current() is pages["preferences"], "user should reach Preferences")
+    check(not win.sidebar.isHidden(), "the side menu should show after login")
+    check(win.sidebar.userName.text().lower() == "student", "the side menu should show the user name")
+    check(win.sidebar.adminButtons[0].isHidden(), "a normal user must not see the Admin entry")
+    check(win.sidebar.buttons["home"].isChecked(), "Home should be lit on the home page")
+    check("5 applications" in pages["preferences"].tile_texts["btnApplications"].text(),
+          "the Applications card should show the live count")
+    check("2 projects sent" in pages["preferences"].tile_texts["btnInterviews"].text(),
+          "the Interviews card should show the live count")
     pages["preferences"].btnLogout.click()
     check(current() is pages["login"], "log out should return to login")
     check(login.inputUsername.text() == "", "log out should clear the login form")
@@ -147,7 +157,14 @@ def run_flow(use_ui_file, store):
     check("Full Name:" in detail.toPlainText() and "Ali As" in detail.toPlainText(), "detail should list the fields")
     apps.btnRefresh.click()
     check(apps.tableApplications.rowCount() == 5, "Refresh should keep the current view")
+    check(apps.btnAllApplications.isChecked() and not apps.btnMeetingDefined.isChecked(),
+          "the chosen filter button should look selected")
+    check(apps.btnReturn.isHidden() and apps.btnExit.isHidden(), "the side menu replaces Return and Exit")
+    check(apps.tableApplications.editTriggers() == apps.tableApplications.EditTrigger.NoEditTriggers,
+          "tables must be read-only")
     apps.btnMeetingDefined.click()
+    check(apps.btnMeetingDefined.isChecked() and not apps.btnAllApplications.isChecked(),
+          "the selected filter should move to the clicked button")
     check(apps.tableApplications.rowCount() == 2, "Mentor Meeting Defined should show 2 rows")
     apps.btnMeetingNotDefined.click()
     check(apps.tableApplications.rowCount() == 3, "Mentor Meeting Not Defined should show 3 rows")
@@ -167,6 +184,7 @@ def run_flow(use_ui_file, store):
     apps.inputSearch.setText("")
     apps.comboFilters.setCurrentIndex(1)  # Duplicate Records
     check(apps.tableApplications.rowCount() == 2, "duplicates should show 2 rows")
+    check(not any(button.isChecked() for button in apps.segments), "an extra filter lights no button")
     apps.comboFilters.setCurrentIndex(2)  # Previous VIT Check
     check(apps.tableApplications.rowCount() == 3, "previous VIT check should show 3 people")
     check(apps.tableApplications.columnCount() == 3, "people views should show 3 columns")
@@ -178,6 +196,16 @@ def run_flow(use_ui_file, store):
     check(apps.btnExit is not None, "Applications should have an Exit button")
     apps.btnReturn.click()
     check(current() is pages["preferences"], "Applications return failed")
+    # the side menu opens every page and lights its own entry
+    for key, page_name in (("applications", "applications"), ("mentor_interview", "mentor_interview"),
+                           ("interviews", "interviews"), ("home", "preferences")):
+        win.sidebar.buttons[key].click()
+        check(current() is pages[page_name], f"side menu entry {key} should open {page_name}")
+        check(win.sidebar.buttons[key].isChecked(), f"side menu entry {key} should be lit")
+    win.sidebar.buttons["applications"].click()
+    # opening a page loads its list again and keeps the last chosen view (Application Filter: 4 names)
+    check(pages["applications"].tableApplications.rowCount() == 4, "a page should load its list when opened")
+    win.sidebar.buttons["home"].click()
 
     pages["preferences"].btnInterviews.click()
     iv = pages["interviews"]
@@ -211,6 +239,13 @@ def run_flow(use_ui_file, store):
     win.show_page("login")
     login.btnLogin.click()
     check(current() is pages["preferences_admin"], "admin should reach admin Preferences")
+    check(not win.sidebar.adminButtons[0].isHidden(), "an admin should see the Admin entry")
+    check(win.sidebar.userRole.text() == "Administrator", "the side menu should show the role")
+    win.sidebar.buttons["admin_menu"].click()
+    check(current() is pages["admin_menu"], "the Admin entry should open the Admin Menu")
+    check("Event Record" in pages["admin_menu"].labelHint.text(), "the Admin page should explain the empty table")
+    win.sidebar.buttons["home"].click()
+    check(current() is pages["preferences_admin"], "admin Home should go to the admin home page")
     pages["preferences_admin"].btnAdmin.click()
     adm = pages["admin_menu"]
     check(current() is adm, "Admin Menu not opened")
@@ -242,6 +277,9 @@ def run_flow(use_ui_file, store):
     pages["preferences_admin"].btnApplications.click()
     pages["applications"].btnReturn.click()
     check(current() is pages["preferences_admin"], "admin return should go to admin Preferences")
+
+    win.sidebar.btnLogout.click()
+    check(current() is login and win.sidebar.isHidden(), "Log out in the side menu should return to the login page")
 
     # the window must not close the shared connection before the next run
     win.store = DataStore(Database(store.db.config))
@@ -277,6 +315,10 @@ def run_database_checks(db, config):
     db.execute("INSERT INTO Kursiyerler (AdSoyad, MailAdresi) VALUES ('Ali As', 'other@x.com')")
     check(len(db.fetch_all("SELECT 1 FROM Kursiyerler WHERE AdSoyad = 'Ali As'")) == 2,
           "the same name with another e-mail is a different person")
+
+    summary = store.summary()
+    check(summary == {"applications": 5, "meeting_defined": 2, "mentor": 2, "sent": 2, "received": 1},
+          f"the home screen numbers are wrong: {summary}")
 
     # a failed transaction leaves nothing behind
     before = db.fetch_value("SELECT count(*) FROM Kursiyerler")

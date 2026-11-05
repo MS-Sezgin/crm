@@ -12,7 +12,8 @@ All data lives in a PostgreSQL database. The old Excel files are loaded into it 
 - **Interviews**: project sent / project received, name search
 - **Admin Menu**: Google Calendar events in a table, reminder mail to event participants through Gmail
 - Every list, search and filter is an SQL query (parameterised, so typed text cannot change a query)
-- Every page has the same visual style, with a separate accent color per section
+- Modern interface: dark navy side menu (Home, Applications, Mentor Interview, Interviews, Admin Menu for administrators, Log out, Exit), a Home screen with live numbers from the database, icons on every button, a clearly selected filter button, readable read-only tables and a status bar that shows the database connection
+- The look is the same in code mode and in `.ui` mode
 
 ## Requirements
 
@@ -109,7 +110,7 @@ Put the `.env` file (and `credentials/`, if you use Google) next to `CRM.exe`.
 ## Project structure
 
 ```
-main.py                 main window and page navigation
+main.py                 main window (side menu + pages) and navigation
 data_store.py           DataStore: the SQL queries behind every page
 database/
   config.py             DbConfig: settings from environment / .env
@@ -121,8 +122,10 @@ database/
 migrate_excel_to_db.py  one-time Excel -> PostgreSQL migration
 check_db.py             database connection check
 google_services.py      Google Calendar and Gmail access
-styles.py               shared stylesheet and page color themes
-pages/                  one module per window (code version)
+styles.py               shared stylesheets (pages, side menu, status bar)
+sidebar.py              the dark side menu
+icons.py                vector icons drawn from inline SVG (no image files)
+pages/                  one module per window (code version); home_base.py = shared home screen
 ui/                     one Qt Designer .ui file per window
 diagram/                ERD, class diagram, use case diagram (+ .dot sources)
 test_navigation.py      database and navigation tests

@@ -44,7 +44,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="comboRow">
+       <layout class="QHBoxLayout" name="comboRow" stretch="0,1">
         <item><widget class="QLabel" name="labelFilter"><property name="text"><string>Filter</string></property></widget></item>
         <item><widget class="QComboBox" name="comboFilters">
          <item><property name="text"><string>More filters...</string></property></item>
@@ -57,7 +57,6 @@
       </item>
       <item>
        <widget class="QTableWidget" name="tableApplications">
-        <property name="styleSheet"><string>QHeaderView::section { background-color: #DBE7FF; color: #0F172A; font-weight: 600; font-size: 12px; padding: 10px 12px; border: none; border-right: 1px solid #94A3B8; border-bottom: 2px solid #1D4ED8; }</string></property>
         <property name="alternatingRowColors"><bool>true</bool></property>
         <attribute name="horizontalHeaderStretchLastSection"><bool>false</bool></attribute>
         <attribute name="horizontalHeaderDefaultSectionSize"><number>150</number></attribute>

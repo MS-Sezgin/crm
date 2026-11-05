@@ -1,13 +1,17 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLabel, QPushButton, QVBoxLayout
 
-from pages.base_page import BasePage
+from pages.home_base import HomeBase
 from styles import THEMES
 
 
-class PreferencesPage(BasePage):
+class PreferencesPage(HomeBase):
     UI_FILE = "preferences_page.ui"
-    LOGO_WIDTH = 240
+    TILES = [
+        ("btnApplications", "applications", "Applications", "Search and review submitted applications"),
+        ("btnMentorInterview", "mentor", "Mentor Interview", "Mentor conversations and recommendations"),
+        ("btnInterviews", "interviews", "Interviews", "Project exchange between students and mentors"),
+    ]
     THEME = THEMES["preferences"]
 
     def build_ui(self):
@@ -21,11 +25,11 @@ class PreferencesPage(BasePage):
         root.addWidget(self.labelLogo, 0, Qt.AlignmentFlag.AlignHCenter)
 
         header = self.make_header("Preferences", "Choose a section to continue")
-        header.setFixedWidth(460)
+        header.setFixedWidth(620)
         root.addWidget(header, 0, Qt.AlignmentFlag.AlignHCenter)
 
         card = self.make_card()
-        card.setFixedWidth(460)
+        card.setFixedWidth(620)
         body = QVBoxLayout(card)
         body.setContentsMargins(24, 24, 24, 24)
         body.setSpacing(12)
@@ -37,7 +41,7 @@ class PreferencesPage(BasePage):
         self.btnMentorInterview = QPushButton("Mentor Interview")
         self.btnInterviews = QPushButton("Interviews")
         for button in (self.btnApplications, self.btnMentorInterview, self.btnInterviews):
-            button.setMinimumHeight(52)
+            button.setMinimumHeight(72)
             body.addWidget(button)
         root.addWidget(card, 0, Qt.AlignmentFlag.AlignHCenter)
 

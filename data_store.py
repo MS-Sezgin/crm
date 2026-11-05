@@ -173,6 +173,14 @@ class DataStore:
             "FROM Basvurular WHERE BasvuruDonemi <> ALL(%s)", (PAST_PERIODS,))
         return tuple(row)
 
+    def summary(self):
+        """Numbers for the home screen cards (each one is a single SQL count)."""
+        total, defined, _ = self.application_counts()
+        sent, received = self.db.fetch_one(
+            "SELECT count(ProjeGonderilisTarihi), count(ProjeninGelisTarihi) FROM Mulakatlar")
+        return {"applications": total, "meeting_defined": defined, "mentor": self.repos.mentor.count(),
+                "sent": sent, "received": received}
+
     def people(self, view, search=""):
         """People across the form applications and the old VIT lists.
 
@@ -246,6 +254,10 @@ class DataStore:
         return self._table([header for header, _ in MENTOR_COLUMNS], sql, params)
 
     # ----- connection info --------------------------------------------------------
+
+    def describe_short(self):
+        cfg = self.db.config
+        return f"PostgreSQL  -  {cfg.dbname} @ {cfg.host}:{cfg.port}"
 
     def describe(self):
         cfg = self.db.config
