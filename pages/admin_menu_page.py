@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMessageBox, QPushButto
 
 import google_services
 from data_store import CALENDAR_COLUMNS
-from pages.base_page import BasePage, fill_table, fit_columns
+from dialogs import UsersDialog
+from pages.base_page import BasePage, fill_table, fit_columns, find_layout
 from styles import THEMES
 
 
@@ -48,6 +49,11 @@ class AdminMenuPage(BasePage):
         self.events = []
         self.btnEventRecord.clicked.connect(self.on_event_record)
         self.btnMail.clicked.connect(self.on_mail)
+        # "Users" sits next to Mail; added by code so it exists in code mode and in .ui mode
+        self.btnUsers = QPushButton("Users")
+        self.btnUsers.clicked.connect(self.on_users)
+        row = find_layout(self.btnMail.parentWidget().layout(), self.btnMail)
+        row.insertWidget(row.indexOf(self.btnMail) + 1, self.btnUsers)
 
     def decorate(self):
         super().decorate()
@@ -57,6 +63,10 @@ class AdminMenuPage(BasePage):
         self.labelHint.setWordWrap(True)
         fit_columns(self.tableCalendar)
         self.findChild(QFrame, "card").layout().addWidget(self.labelHint)
+
+    def on_users(self, *_):
+        dialog = UsersDialog(self, self.store, self.current_user)
+        self.run_dialog(dialog)
 
     def confirm(self, text):
         answer = QMessageBox.question(self, "Send mail", text)

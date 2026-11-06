@@ -41,11 +41,16 @@ QLabel#labelHint {{ color: {t['muted']}; font-size: 13px; font-weight: 500; }}
 QLabel#labelWarning {{ color: {DANGER['base']}; font-size: 12px; font-weight: 600; }}
 QLabel#labelBadge {{ background-color: #DBEAFE; color: #1D4ED8; border-radius: 10px; padding: 4px 12px; font-size: 11px; font-weight: 700; }}
 
-QLineEdit, QComboBox {{ background-color: #FFFFFF; color: {t['text']}; border: 1px solid #CBD5E1; border-radius: 10px; padding: 9px 12px; min-height: 20px; selection-background-color: {t['accent']}; }}
-QLineEdit:hover, QComboBox:hover {{ border: 1px solid #94A3B8; }}
-QLineEdit:focus, QComboBox:focus {{ border: 2px solid {t['accent']}; padding: 8px 11px; }}
-QComboBox::drop-down {{ border: none; width: 30px; }}
-QComboBox::down-arrow {{ image: url({arrow}); width: 14px; height: 14px; }}
+QLineEdit, QComboBox, QDateEdit, QPlainTextEdit {{ background-color: #FFFFFF; color: {t['text']}; border: 1px solid #CBD5E1; border-radius: 10px; padding: 9px 12px; min-height: 20px; selection-background-color: {t['accent']}; }}
+QLineEdit:hover, QComboBox:hover, QDateEdit:hover, QPlainTextEdit:hover {{ border: 1px solid #94A3B8; }}
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QPlainTextEdit:focus {{ border: 2px solid {t['accent']}; padding: 8px 11px; }}
+QLineEdit:disabled, QComboBox:disabled, QDateEdit:disabled {{ background-color: #F1F5F9; color: #64748B; }}
+QComboBox::drop-down, QDateEdit::drop-down {{ border: none; width: 30px; }}
+QComboBox::down-arrow, QDateEdit::down-arrow {{ image: url({arrow}); width: 14px; height: 14px; }}
+QDialog#pageRoot QLabel#dialogTitle {{ font-size: 20px; font-weight: 700; color: {t['text']}; }}
+QDialog#pageRoot QLabel#dialogIntro {{ color: {t['muted']}; font-size: 12px; }}
+QScrollArea {{ background: transparent; border: none; }}
+QScrollArea > QWidget > QWidget {{ background: transparent; }}
 QComboBox QAbstractItemView {{ background-color: #FFFFFF; border: 1px solid {t['border']}; outline: none; padding: 4px; selection-background-color: #DBEAFE; selection-color: {t['text']}; }}
 QCheckBox {{ color: {t['muted']}; font-size: 12px; spacing: 8px; }}
 QCheckBox::indicator {{ width: 16px; height: 16px; border: 1px solid #94A3B8; border-radius: 4px; background: #FFFFFF; }}
@@ -56,8 +61,10 @@ QPushButton:hover {{ background-color: {t['hover']}; border: 1px solid {t['hover
 QPushButton:pressed {{ background-color: {t['pressed']}; border: 1px solid {t['pressed']}; }}
 QPushButton:disabled {{ background-color: #CBD5E1; border: 1px solid #CBD5E1; color: #F8FAFC; }}
 QPushButton:focus {{ outline: none; }}
-QPushButton#btnClose, QPushButton#btnExit {{ background-color: {DANGER['base']}; border: 1px solid {DANGER['base']}; }}
-QPushButton#btnClose:hover, QPushButton#btnExit:hover {{ background-color: {DANGER['hover']}; border: 1px solid {DANGER['hover']}; }}
+QPushButton#btnClose, QPushButton#btnExit, QPushButton#btnDelete {{ background-color: {DANGER['base']}; border: 1px solid {DANGER['base']}; }}
+QPushButton#btnClose:hover, QPushButton#btnExit:hover, QPushButton#btnDelete:hover {{ background-color: {DANGER['hover']}; border: 1px solid {DANGER['hover']}; }}
+QPushButton#btnDelete:pressed {{ background-color: {DANGER['pressed']}; border: 1px solid {DANGER['pressed']}; }}
+QPushButton#btnDelete:disabled {{ background-color: #CBD5E1; border: 1px solid #CBD5E1; color: #F8FAFC; }}
 
 QPushButton[variant="secondary"] {{ background-color: #FFFFFF; color: {t['text']}; border: 1px solid #CBD5E1; }}
 QPushButton[variant="secondary"]:hover {{ background-color: #F8FAFC; border: 1px solid {t['accent']}; color: {t['accent']}; }}

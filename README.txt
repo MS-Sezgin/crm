@@ -10,10 +10,28 @@ Features
 - Applications: all, mentor meeting defined / not defined, name search, and filters for duplicate records, unique names, previous VIT check and different records
 - Mentor Interview: all conversations, tab filter by recommendation, search by candidate or mentor name
 - Interviews: project sent / project received, name search
-- Admin Menu: Google Calendar events in a table, reminder mail to event participants through Gmail
+- Admin Menu: Google Calendar events in a table, reminder mail to event participants through Gmail, and user management (add a user, reset a password, delete a user)
+- Managing data through the screens: add new applications, mentor meetings and interview records with forms; administrators can also edit and delete them
+- Export CSV on every list: saves the rows on screen as a file that opens in Excel
 - Every list, search and filter is an SQL query (parameterised, so typed text cannot change a query)
 - Modern interface: dark navy side menu (Home, Applications, Mentor Interview, Interviews, Admin Menu for administrators, Log out, Exit), a Home screen with live numbers from the database, icons on every button, a clearly selected filter button, readable read-only tables and a status bar that shows the database connection
 - The look is the same in code mode and in .ui mode
+
+Adding and changing records
+
+Applications, Mentor Interview and Interviews have a button row above the table:
+- New ...: every signed-in user. Opens a form; the new row appears selected in the table.
+- Edit: administrators. Changes the selected row (name and e-mail of a candidate stay fixed).
+- Delete: administrators. Asks first, then deletes the selected row.
+- Export CSV: every signed-in user. Saves the rows on screen (semicolon separated, UTF-8, opens in Excel).
+
+Rules (database/services.py, class RecordService):
+- A new application finds the candidate by name + e-mail (case and accents ignored). A known candidate is reused, never added twice.
+- Required fields, e-mail format, phone, scores 0-10 and date order are checked. A wrong input shows a red message and the form stays open.
+- VIT1 and VIT2 are old lists kept as history: they cannot be added, changed or deleted on screen.
+- Statements that belong together run in one transaction.
+- When the last record of a candidate is deleted, the candidate is removed too. A candidate with a record always stays.
+- Admin menu > Users: add a user, reset a password, delete a user. A password needs at least 6 characters. You cannot delete your own account or the last administrator.
 
 Requirements
 

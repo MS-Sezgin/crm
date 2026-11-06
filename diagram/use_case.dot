@@ -26,14 +26,18 @@ digraph UseCases {
     u8 [label="Filter conversations by tab"];
     u9 [label="Reload data from database"];
     u10 [label="Return / log out / exit"];
+    u11 [label="Add application,\nmentor meeting,\ninterview record"];
+    u12 [label="Export list as CSV"];
+    a4 [label="Edit or delete\na record"];
+    a5 [label="Manage users\n(add, reset password, delete)"];
     a1 [label="Open Admin Menu"];
     a2 [label="View calendar events"];
     a3 [label="Send reminder mail\nto participants"];
   }
-  User -> {u1 u2 u3 u4 u5 u6 u7 u8 u9 u10};
+  User -> {u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12};
   Admin -> User [arrowhead=empty, label="is a"];
-  Admin -> {a1 a2 a3};
+  Admin -> {a1 a2 a3 a4 a5};
   u1 -> PG [style=dashed, label="check hash"];
-  u3 -> PG [style=dashed]; u6 -> PG [style=dashed]; u7 -> PG [style=dashed];
+  u3 -> PG [style=dashed]; u11 -> PG [style=dashed, label="validate, save"]; a4 -> PG [style=dashed]; a5 -> PG [style=dashed]; u6 -> PG [style=dashed]; u7 -> PG [style=dashed];
   a2 -> GCal [style=dashed]; a3 -> Gmail [style=dashed];
 }

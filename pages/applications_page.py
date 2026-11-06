@@ -2,7 +2,9 @@ from PyQt6.QtWidgets import (QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushBut
                              QTableWidget, QVBoxLayout)
 
 from database import DatabaseError
+from dialogs import ApplicationDialog
 from pages.base_page import BasePage, fill_table
+from pages.record_actions import RecordActionsMixin
 from styles import THEMES
 
 EXTRA_FILTERS = [
@@ -14,7 +16,7 @@ EXTRA_FILTERS = [
 ]
 
 
-class ApplicationsPage(BasePage):
+class ApplicationsPage(RecordActionsMixin, BasePage):
     UI_FILE = "applications_page.ui"
     THEME = THEMES["applications"]
 
@@ -70,6 +72,8 @@ class ApplicationsPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableApplications)
+        self.setup_record_actions(self.tableApplications, "application", self.on_new, self.on_edit,
+                                  self.on_delete, "applications.csv")
         self.route(self.btnReturn, "return_preferences")
         self.btnRefresh.clicked.connect(self.on_refresh)
         self.route(self.btnExit, "exit")
@@ -119,6 +123,45 @@ class ApplicationsPage(BasePage):
         if view in ("previous_vit", "different"):
             return self.store.people(view, search)
         return self.store.applications(view, search)
+
+    # ----- add, change, delete ------------------------------------------------------------
+
+    def on_new(self):
+        saved = {}
+        def save(values):
+            saved["result"] = self.store.records.add_application(values)
+            saved["name"] = values["name"].strip()
+        if not self.open_form(ApplicationDialog(self, self.store, save)):
+            return
+        application_id, _, is_new, earlier = saved["result"]
+        self.current_view = "all"            # show the new row: all form applications, no search text
+        self.inputSearch.clear()
+        self.comboFilters.blockSignals(True)
+        self.comboFilters.setCurrentIndex(0)
+        self.comboFilters.blockSignals(False)
+        self.update_counts()
+        self.refresh()
+        self.select_record(application_id)
+        who = "a new candidate" if is_new else f"an existing candidate ({earlier} earlier application(s))"
+        self.show_message(f"Application saved for {saved['name']}, {who}.")
+
+    def on_edit(self):
+        record_id, initial = self.load_for_edit(self.store.records.get_application)
+        if record_id is None:
+            return
+        dialog = ApplicationDialog(
+            self, self.store, lambda values: self.store.records.update_application(record_id, values), initial)
+        if self.open_form(dialog):
+            self.update_counts()
+            self.refresh()
+            self.select_record(record_id)
+            self.show_message("The application was updated.")
+
+    def on_delete(self):
+        name = self.selected_row_text(1)
+        if self.delete_selected(f"the application of {name}", self.store.records.delete_application):
+            self.update_counts()
+            self.refresh()
 
     def on_refresh(self, *_):
         self.update_counts()

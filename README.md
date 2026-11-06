@@ -10,10 +10,32 @@ All data lives in a PostgreSQL database. The old Excel files are loaded into it 
 - **Applications**: all, mentor meeting defined / not defined, name search, and filters for duplicate records, unique names, previous VIT check and different records
 - **Mentor Interview**: all conversations, tab filter by recommendation, search by candidate or mentor name
 - **Interviews**: project sent / project received, name search
-- **Admin Menu**: Google Calendar events in a table, reminder mail to event participants through Gmail
+- **Admin Menu**: Google Calendar events in a table, reminder mail to event participants through Gmail, and user management (add a user, reset a password, delete a user)
+- **Managing data through the screens**: add new applications, mentor meetings and interview records with forms; administrators can also edit and delete them (see below)
+- **Export CSV** on every list: saves the rows on screen as a file that opens in Excel
 - Every list, search and filter is an SQL query (parameterised, so typed text cannot change a query)
 - Modern interface: dark navy side menu (Home, Applications, Mentor Interview, Interviews, Admin Menu for administrators, Log out, Exit), a Home screen with live numbers from the database, icons on every button, a clearly selected filter button, readable read-only tables and a status bar that shows the database connection
 - The look is the same in code mode and in `.ui` mode
+
+## Adding and changing records
+
+Applications, Mentor Interview and Interviews have a button row above the table:
+
+| Button | Who | What it does |
+|---|---|---|
+| New ... | every signed-in user | opens a form; the new row appears selected in the table |
+| Edit | administrators | changes the selected row (name and e-mail of a candidate stay fixed) |
+| Delete | administrators | asks first, then deletes the selected row |
+| Export CSV | every signed-in user | saves the rows on screen (semicolon separated, UTF-8, opens in Excel) |
+
+Rules behind the forms (`database/services.py`, class `RecordService`):
+
+- A new application finds the candidate by name + e-mail (case and accents ignored). A known candidate is reused, never added twice; empty contact fields are filled in, existing values are kept.
+- Required fields, e-mail format, phone and postal code, scores 0-10, and "project received not before project sent" are checked. A wrong input shows a red message in the form and the form stays open.
+- VIT1 and VIT2 are the old lists and are kept as history: they cannot be added, changed or deleted on screen.
+- Statements that belong together run in one transaction (a failure leaves nothing behind).
+- When the last record of a candidate is deleted, the candidate is removed too. A candidate who still has a record always stays (the database also enforces this with `ON DELETE RESTRICT`).
+- In the Admin menu, **Users** lists the users. A password needs at least 6 characters and is stored as a salted hash. You cannot delete your own account or the last administrator.
 
 ## Requirements
 
@@ -96,7 +118,7 @@ Without this setup everything else works; the admin menu shows a message instead
 python test_navigation.py
 ```
 
-The test needs PostgreSQL and the same settings as the application. It builds a temporary schema (`crm_test_<number>`), fills it with sample rows, runs the screens in code mode and in `.ui` mode with fake Google functions, and drops the schema at the end. Your real tables are not touched.
+The test needs PostgreSQL and the same settings as the application. It builds a temporary schema (`crm_test_<number>`), fills it with sample rows, runs the screens in code mode and in `.ui` mode with fake Google functions (including adding, changing and deleting records as a user and as an administrator), and drops the schema at the end. Your real tables are not touched.
 
 ## Building the .exe (Windows)
 
@@ -115,7 +137,8 @@ data_store.py           DataStore: the SQL queries behind every page
 database/
   config.py             DbConfig: settings from environment / .env
   connection.py         Database: connection, transactions, queries
-  repositories.py       one repository class per table
+  repositories.py       one repository class per table (read, add, change, delete)
+  services.py           RecordService: validation and rules for adding / changing / deleting
   security.py           PasswordHasher
   text_utils.py         accent-insensitive text helper
   schema.sql            tables, indexes, views, search function
@@ -124,8 +147,10 @@ check_db.py             database connection check
 google_services.py      Google Calendar and Gmail access
 styles.py               shared stylesheets (pages, side menu, status bar)
 sidebar.py              the dark side menu
+dialogs.py              entry forms (application, mentor meeting, interview, users)
 icons.py                vector icons drawn from inline SVG (no image files)
-pages/                  one module per window (code version); home_base.py = shared home screen
+pages/                  one module per window (code version); home_base.py = shared home screen,
+                        record_actions.py = New / Edit / Delete / Export buttons
 ui/                     one Qt Designer .ui file per window
 diagram/                ERD, class diagram, use case diagram (+ .dot sources)
 test_navigation.py      database and navigation tests

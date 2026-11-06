@@ -27,8 +27,8 @@ digraph Classes {
 
   DataStore [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
     <TR><TD BGCOLOR="#CCFBF1"><B>DataStore</B></TD></TR>
-    <TR><TD ALIGN="LEFT">- db : Database<BR ALIGN="LEFT"/>- repos : CrmRepositories<BR ALIGN="LEFT"/></TD></TR>
-    <TR><TD ALIGN="LEFT">+ check_login(user, password) : str<BR ALIGN="LEFT"/>+ summary() : dict<BR ALIGN="LEFT"/>+ applications(view, search)<BR ALIGN="LEFT"/>+ application_counts()<BR ALIGN="LEFT"/>+ people(view, search)<BR ALIGN="LEFT"/>+ interviews(kind, search)<BR ALIGN="LEFT"/>+ mentor(category, search)<BR ALIGN="LEFT"/>+ mentor_categories()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+    <TR><TD ALIGN="LEFT">- db : Database<BR ALIGN="LEFT"/>- repos : CrmRepositories<BR ALIGN="LEFT"/>+ records : RecordService<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ check_login(user, password) : str<BR ALIGN="LEFT"/>+ summary() : dict<BR ALIGN="LEFT"/>+ applications(view, search)<BR ALIGN="LEFT"/>+ application_counts()<BR ALIGN="LEFT"/>+ people(view, search)<BR ALIGN="LEFT"/>+ interviews(kind, search)<BR ALIGN="LEFT"/>+ mentor(category, search)<BR ALIGN="LEFT"/>+ mentor_categories()<BR ALIGN="LEFT"/>+ candidates() / *_choices()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
 
   Database [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
     <TR><TD BGCOLOR="#CCFBF1"><B>Database</B></TD></TR>
@@ -46,13 +46,23 @@ digraph Classes {
 
   BaseRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#B45309">
     <TR><TD BGCOLOR="#FEF3C7"><I>BaseRepository</I></TD></TR>
-    <TR><TD ALIGN="LEFT"># TABLE : str<BR ALIGN="LEFT"/>+ count() : int<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+    <TR><TD ALIGN="LEFT"># TABLE, ID_COLUMN, FIELDS<BR ALIGN="LEFT"/>+ count() : int<BR ALIGN="LEFT"/>+ get(id)   + update(id, values)<BR ALIGN="LEFT"/>+ delete(id)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
 
-  KursiyerRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>KursiyerRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ find(name, mail)<BR ALIGN="LEFT"/>+ add(...)   + fill_missing(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  KursiyerRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>KursiyerRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ find(name, mail)<BR ALIGN="LEFT"/>+ add(...)   + fill_missing(...)<BR ALIGN="LEFT"/>+ delete_if_unused(id)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
   BasvuruRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>BasvuruRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(kursiyer_id, values)<BR ALIGN="LEFT"/>+ count_by_period()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
   MentorRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>MentorRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
   MulakatRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>MulakatRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(...)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
-  KullaniciRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>KullaniciRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(user, password, role)<BR ALIGN="LEFT"/>+ authenticate(user, password)<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  KullaniciRepository [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#B45309"><TR><TD><B>KullaniciRepository</B></TD></TR><TR><TD ALIGN="LEFT">+ add(user, password, role)<BR ALIGN="LEFT"/>+ authenticate(user, password)<BR ALIGN="LEFT"/>+ set_password / delete_user<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  RecordService [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#0F766E">
+    <TR><TD BGCOLOR="#CCFBF1"><B>RecordService</B></TD></TR>
+    <TR><TD ALIGN="LEFT">- repos : CrmRepositories<BR ALIGN="LEFT"/></TD></TR>
+    <TR><TD ALIGN="LEFT">+ add_application(form)<BR ALIGN="LEFT"/>+ update_ / delete_application(id)<BR ALIGN="LEFT"/>+ add_ / update_ / delete_mentor_meeting<BR ALIGN="LEFT"/>+ add_ / update_ / delete_interview<BR ALIGN="LEFT"/>+ add_user / reset_password / delete_user<BR ALIGN="LEFT"/>raises ValidationError<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  RecordActionsMixin [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#1D4ED8"><TR><TD BGCOLOR="#DBE7FF"><B>RecordActionsMixin</B></TD></TR><TR><TD ALIGN="LEFT">+ setup_record_actions(...)<BR ALIGN="LEFT"/>+ selected_record_id()<BR ALIGN="LEFT"/>+ export_csv()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  FormDialog [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#1D4ED8"><TR><TD BGCOLOR="#DBE7FF"><B>FormDialog</B> «QDialog»</TD></TR><TR><TD ALIGN="LEFT">+ submit : callable<BR ALIGN="LEFT"/>+ saved : bool<BR ALIGN="LEFT"/>+ values() : dict<BR ALIGN="LEFT"/>+ accept()<BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+  FormDialogs [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3" COLOR="#64748B"><TR><TD><B>ApplicationDialog</B><BR/><B>MentorDialog</B><BR/><B>InterviewDialog</B><BR/><B>UserDialog, PasswordDialog</B></TD></TR></TABLE>>];
 
   PasswordHasher [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#7C3AED">
     <TR><TD BGCOLOR="#EDE9FE"><B>PasswordHasher</B></TD></TR>
@@ -73,6 +83,7 @@ digraph Classes {
   HomeBase -> BasePage; PreferencesPage -> HomeBase; PreferencesAdminPage -> HomeBase; AdminMenuPage -> BasePage;
   KursiyerRepository -> BaseRepository; BasvuruRepository -> BaseRepository; MentorRepository -> BaseRepository;
   MulakatRepository -> BaseRepository; KullaniciRepository -> BaseRepository;
+  FormDialogs -> FormDialog;
 
   // composition / aggregation
   edge [arrowhead=diamond, style=solid, dir=back, arrowtail=none];
@@ -87,6 +98,10 @@ digraph Classes {
   MainWindow -> Sidebar [label="1 : 1", dir=back, arrowhead=none, arrowtail=diamond];
   BasePage -> DataStore [label="queries"];
   DataStore -> CrmRepositories; DataStore -> Database;
+  DataStore -> RecordService [label="records"]; RecordService -> CrmRepositories [label="validates, then writes"];
+  ApplicationsPage -> RecordActionsMixin [label="uses"]; MentorInterviewPage -> RecordActionsMixin; InterviewsPage -> RecordActionsMixin;
+  RecordActionsMixin -> FormDialog [label="opens"];
+  AdminMenuPage -> FormDialog [label="Users window"];
   CrmRepositories -> Database [label="shared connection"];
   Database -> DbConfig;
   KullaniciRepository -> PasswordHasher;

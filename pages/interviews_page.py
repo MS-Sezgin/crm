@@ -1,11 +1,13 @@
 from PyQt6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton, QTableWidget, QVBoxLayout, QLabel
 
 from database import DatabaseError
+from dialogs import InterviewDialog
 from pages.base_page import BasePage, fill_table
+from pages.record_actions import RecordActionsMixin
 from styles import THEMES
 
 
-class InterviewsPage(BasePage):
+class InterviewsPage(RecordActionsMixin, BasePage):
     UI_FILE = "interviews_page.ui"
     THEME = THEMES["interviews"]
 
@@ -52,6 +54,8 @@ class InterviewsPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableInterviews)
+        self.setup_record_actions(self.tableInterviews, "interview record", self.on_new, self.on_edit,
+                                  self.on_delete, "interviews.csv")
         self.route(self.btnReturn, "return_preferences")
         self.btnRefresh.clicked.connect(self.on_refresh)
         self.route(self.btnExit, "exit")
@@ -67,6 +71,38 @@ class InterviewsPage(BasePage):
     def set_view(self, view):
         self.current_view = view
         self.refresh()
+
+    # ----- add, change, delete ------------------------------------------------------------
+
+    def show_everything(self):
+        self.inputSearch.clear()
+        self.current_view = None
+        self.refresh()
+
+    def on_new(self):
+        saved = {}
+        def save(values):
+            saved["id"] = self.store.records.add_interview(values)
+        if self.open_form(InterviewDialog(self, self.store, save)):
+            self.show_everything()
+            self.select_record(saved["id"])
+            self.show_message("Interview record saved.")
+
+    def on_edit(self):
+        record_id, initial = self.load_for_edit(self.store.records.get_interview)
+        if record_id is None:
+            return
+        dialog = InterviewDialog(
+            self, self.store, lambda values: self.store.records.update_interview(record_id, values), initial)
+        if self.open_form(dialog):
+            self.show_everything()
+            self.select_record(record_id)
+            self.show_message("The interview record was updated.")
+
+    def on_delete(self):
+        name = self.selected_row_text(0)
+        if self.delete_selected(f"the interview record of {name}", self.store.records.delete_interview):
+            self.show_everything()
 
     def on_refresh(self, *_):
         text = self.refresh()

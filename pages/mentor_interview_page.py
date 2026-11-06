@@ -1,11 +1,13 @@
 from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QVBoxLayout
 
 from database import DatabaseError
+from dialogs import MentorDialog
 from pages.base_page import BasePage, fill_table
+from pages.record_actions import RecordActionsMixin
 from styles import THEMES
 
 
-class MentorInterviewPage(BasePage):
+class MentorInterviewPage(RecordActionsMixin, BasePage):
     UI_FILE = "mentor_interview_page.ui"
     THEME = THEMES["mentor_interview"]
 
@@ -55,6 +57,8 @@ class MentorInterviewPage(BasePage):
 
     def connect_signals(self):
         self.add_detail_panel(self.tableConversations)
+        self.setup_record_actions(self.tableConversations, "meeting", self.on_new, self.on_edit,
+                                  self.on_delete, "mentor_meetings.csv")
         self.route(self.btnReturn, "return_preferences")
         self.btnRefresh.clicked.connect(self.on_refresh)
         self.route(self.btnExit, "exit")
@@ -92,6 +96,41 @@ class MentorInterviewPage(BasePage):
         self.comboTabs.blockSignals(False)
         self.current_category = None
         self.refresh()
+
+    # ----- add, change, delete ------------------------------------------------------------
+
+    def show_everything(self):
+        """All conversations, no search text: the view in which a changed row is surely visible."""
+        self.inputSearch.clear()
+        self.load_tabs()  # a new recommendation text becomes a new tab
+        self.current_category = None
+        self.refresh()
+
+    def on_new(self):
+        saved = {}
+        def save(values):
+            saved["id"] = self.store.records.add_mentor_meeting(values)
+        if self.open_form(MentorDialog(self, self.store, save)):
+            self.show_everything()
+            self.select_record(saved["id"])
+            self.show_message("Mentor meeting saved.")
+
+    def on_edit(self):
+        record_id, initial = self.load_for_edit(self.store.records.get_mentor_meeting)
+        if record_id is None:
+            return
+        dialog = MentorDialog(
+            self, self.store, lambda values: self.store.records.update_mentor_meeting(record_id, values), initial)
+        if self.open_form(dialog):
+            self.show_everything()
+            self.select_record(record_id)
+            self.show_message("The mentor meeting was updated.")
+
+    def on_delete(self):
+        name = self.selected_row_text(2)
+        date = self.selected_row_text(0)
+        if self.delete_selected(f"the mentor meeting of {name} ({date})", self.store.records.delete_mentor_meeting):
+            self.show_everything()
 
     def on_refresh(self, *_):
         self.load_tabs()  # recommendation categories may have changed in the database

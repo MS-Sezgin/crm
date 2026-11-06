@@ -16,9 +16,9 @@ form applications only (as the old Applications.xlsx did); "Previous VIT Check" 
 from datetime import date, datetime
 from decimal import Decimal
 
-from database import CrmRepositories
+from database import OLD_LIST_PERIODS, CrmRepositories, RecordService
 
-PAST_PERIODS = ["VIT1", "VIT2"]
+PAST_PERIODS = list(OLD_LIST_PERIODS)
 CALENDAR_COLUMNS = ["Activity Name", "Start Time", "Participant Mail", "Organizer Mail"]
 PEOPLE_HEADERS = ["Full Name", "Email", "Found In"]
 
@@ -74,6 +74,19 @@ INTERVIEW_COLUMNS = [
 _ESCAPE = "!"
 
 
+class Row(list):
+    """One table row (a list of cell texts) that also remembers the id of its database record.
+
+    The screens use ``record_id`` to know which record to edit or delete. It is None for rows
+    that are not one record (the people views combine several applications)."""
+
+    record_id = None
+
+    def __init__(self, cells=(), record_id=None):
+        super().__init__(cells)
+        self.record_id = record_id
+
+
 def cell_text(value):
     """One database value as table text (empty cell for NULL, dd.mm.yyyy for dates)."""
     if value is None:
@@ -110,21 +123,29 @@ def name_search(columns, text):
 
 
 class DataStore:
-    """Read side of the CRM: the lists the pages show, plus the login check."""
+    """Read side of the CRM: the lists the pages show, plus the login check.
+
+    The write side lives in ``self.records`` (a RecordService)."""
 
     def __init__(self, db):
         self.db = db
         self.repos = CrmRepositories(db)
+        self.records = RecordService(self.repos)
 
     # ----- generic ----------------------------------------------------------------
 
-    def _table(self, headers, sql, params):
+    def _table(self, headers, sql, params, with_id=False):
+        """Run a query. With ``with_id`` the first selected column is the record id, not a cell."""
         rows = self.db.fetch_all(sql, params)
-        return headers, [[cell_text(value) for value in row] for row in rows]
+        if with_id:
+            return headers, [Row((cell_text(value) for value in row[1:]), row[0]) for row in rows]
+        return headers, [Row(cell_text(value) for value in row) for row in rows]
 
-    def _select(self, columns, source, conditions, params, order):
+    def _select(self, columns, source, conditions, params, order, id_column=None):
         where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
         select = ", ".join(expression for _, expression in columns)
+        if id_column:
+            select = f"{id_column}, {select}"
         return f"SELECT {select} FROM {source}{where} ORDER BY {order}", params
 
     # ----- login ------------------------------------------------------------------
@@ -163,8 +184,8 @@ class DataStore:
             conditions.append(condition)
             params += extra
         sql, params = self._select(APPLICATION_COLUMNS, self._APPLICATION_SOURCE, conditions, params,
-                                   "b.BasvuruID")
-        return self._table([header for header, _ in APPLICATION_COLUMNS], sql, params)
+                                   "b.BasvuruID", id_column="b.BasvuruID")
+        return self._table([header for header, _ in APPLICATION_COLUMNS], sql, params, with_id=True)
 
     def application_counts(self):
         """(all, mentor meeting defined, not defined) for the filter buttons."""
@@ -224,8 +245,8 @@ class DataStore:
             params += extra
         sql, params = self._select(INTERVIEW_COLUMNS,
                                    "Mulakatlar u JOIN Kursiyerler k ON k.KursiyerID = u.KursiyerID",
-                                   conditions, params, "u.MulakatID")
-        return self._table([header for header, _ in INTERVIEW_COLUMNS], sql, params)
+                                   conditions, params, "u.MulakatID", id_column="u.MulakatID")
+        return self._table([header for header, _ in INTERVIEW_COLUMNS], sql, params, with_id=True)
 
     # ----- mentor conversations ---------------------------------------------------
 
@@ -250,8 +271,35 @@ class DataStore:
             params += extra
         sql, params = self._select(MENTOR_COLUMNS,
                                    "Mentortablosu m JOIN Kursiyerler k ON k.KursiyerID = m.KursiyerID",
-                                   conditions, params, "m.MentorID")
-        return self._table([header for header, _ in MENTOR_COLUMNS], sql, params)
+                                   conditions, params, "m.MentorID", id_column="m.MentorID")
+        return self._table([header for header, _ in MENTOR_COLUMNS], sql, params, with_id=True)
+
+    # ----- choices for the entry forms ------------------------------------------------
+
+    def candidates(self):
+        """[(KursiyerID, "Name  <e-mail>")] for the candidate drop-downs of the forms."""
+        return [(kid, f"{name}  <{mail}>") for kid, name, mail in self.repos.kursiyerler.choices()]
+
+    def application_choices(self, key):
+        """Values already used for one application answer ('status', 'training', ...), for suggestions."""
+        columns = {"status": "SuAnkiDurum", "training": "KatilmakIstenenEgitim", "english": "IngilizceSeviye",
+                   "dutch": "HollandacaSeviye", "departments": "ITBolumleri",
+                   "mentor_meeting": "MentorGorusmesi", "processing": "IslemDurumu",
+                   "province": None, "period": "BasvuruDonemi"}
+        if key == "province":
+            rows = self.db.fetch_all("SELECT DISTINCT YasadiginizEyalet FROM Kursiyerler "
+                                     "WHERE YasadiginizEyalet IS NOT NULL AND YasadiginizEyalet <> '' ORDER BY 1")
+            return [row[0] for row in rows]
+        values = self.repos.basvurular.distinct_values(columns[key])
+        if key == "period":
+            values = [value for value in values if value not in PAST_PERIODS]
+        return values
+
+    def mentor_choices(self, key):
+        """Values already used for 'mentor', 'recommendation' or 'group' in the mentor table."""
+        column = {"mentor": "MentorAdSoyad", "recommendation": "VITProjesineKatilabilirMi",
+                  "group": "VITGrubu"}[key]
+        return self.repos.mentor.distinct_values(column)
 
     # ----- connection info --------------------------------------------------------
 

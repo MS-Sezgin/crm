@@ -111,7 +111,10 @@ class MainWindow(QMainWindow):
                 self.pages[home].set_user(self.user_name)
         if target == "login":
             self.is_admin = False
+            self.user_name = ""
             self.pages["login"].reset()
+        for page in self.pages.values():  # Edit / Delete / Users are for administrators only
+            page.set_role(self.is_admin, self.user_name)
         self.show_page(target)
 
 

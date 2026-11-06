@@ -5,9 +5,9 @@ import os
 from PyQt6 import uic
 from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QPixmap
-from PyQt6.QtWidgets import (QAbstractItemView, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QHeaderView,
-                             QLabel, QLineEdit, QPushButton, QSplitter, QTableWidgetItem, QTextEdit,
-                             QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (QAbstractItemView, QFileDialog, QFrame, QGraphicsDropShadowEffect, QHBoxLayout,
+                             QHeaderView, QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter,
+                             QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget)
 
 import icons
 from styles import build_stylesheet
@@ -19,6 +19,7 @@ LOGO_PATH = os.path.join(resource_dir(), "assets", "wearhere_logo.png")
 
 
 MIN_COLUMN, MAX_COLUMN = 110, 320
+RECORD_ID_ROLE = Qt.ItemDataRole.UserRole  # where each table cell keeps the id of its database record
 
 
 def fit_columns(table):
@@ -35,8 +36,11 @@ def fill_table(table, headers, rows):
     table.setHorizontalHeaderLabels(headers)
     table.setRowCount(len(rows))
     for r, row in enumerate(rows):
+        record_id = getattr(row, "record_id", None)  # rows from DataStore carry their database id
         for c, value in enumerate(row):
-            table.setItem(r, c, QTableWidgetItem(value))
+            item = QTableWidgetItem(value)
+            item.setData(RECORD_ID_ROLE, record_id)
+            table.setItem(r, c, item)
     fit_columns(table)
 
 
@@ -139,6 +143,8 @@ class BasePage(QWidget):
     UI_FILE = ""
     THEME = None
     LOGO_WIDTH = 0  # 0 = this page has no logo
+    is_admin = False    # set by the main window after login (see set_role)
+    current_user = ""
 
     def __init__(self, use_ui_file=False, store=None):
         super().__init__()
@@ -182,6 +188,11 @@ class BasePage(QWidget):
         "btnLogin": ("login", None),
         "btnEventRecord": ("calendar", None),
         "btnMail": ("mail", None),
+        "btnNew": ("plus", None),
+        "btnEdit": ("pencil", "secondary"),
+        "btnDelete": ("trash", None),
+        "btnExport": ("download", "secondary"),
+        "btnUsers": ("users", "secondary"),
     }
     # buttons that act as the current-view selector (the chosen one is filled blue)
     SEGMENT_ICONS = {
@@ -257,6 +268,28 @@ class BasePage(QWidget):
 
     def on_show(self):
         """Called by the main window each time this page is opened."""
+
+    def set_role(self, is_admin, user_name=""):
+        """Tell the page who is signed in. Pages react in ``on_role_changed`` (for example by
+        enabling the Edit and Delete buttons for administrators only)."""
+        if is_admin != self.is_admin or user_name != self.current_user:
+            self.is_admin = is_admin
+            self.current_user = user_name
+            self.on_role_changed()
+
+    def on_role_changed(self):
+        pass
+
+    # Small hooks the tests replace, so no real window has to be clicked.
+    def run_dialog(self, dialog):
+        dialog.exec()
+
+    def ask_confirm(self, title, text):
+        return QMessageBox.question(self, title, text) == QMessageBox.StandardButton.Yes
+
+    def ask_save_path(self, suggested_name):
+        path, _ = QFileDialog.getSaveFileName(self, "Export to CSV", suggested_name, "CSV files (*.csv)")
+        return path
 
     def route(self, button, target):
         button.clicked.connect(lambda _checked=False, t=target: self.navigate.emit(t))
